@@ -93,6 +93,62 @@ void BiQuad :: setNotch( StkFloat frequency, StkFloat radius )
   b_[1] = (StkFloat) -2.0 * radius * cos( TWO_PI * (double) frequency / Stk::sampleRate() );
 }
 
+void BiQuad :: setFilterType( FilterType filterType, StkFloat frequency, StkFloat Q )
+{
+#if defined(_STK_DEBUG_)
+if ( frequency < 0.0 ) {
+  oStream_ << "BiQuad::setFilterType: frequency argument (" << frequency << ") is negative!";
+  handleError( StkError::WARNING ); return;
+}
+  if ( Q < 0.0 ) {
+  oStream_ << "BiQuad::setFilterType: Q argument (" << Q << ") is negative!";
+  handleError( StkError::WARNING ); return;
+}
+#endif
+
+  //Intermediate values
+  StkFloat K = tan(PI * frequency / Stk::sampleRate());
+  StkFloat kSqr = K * K;
+  StkFloat denom = 1 / (kSqr * Q + K + Q);
+
+  //These are common to all supported filter types
+  a_[1] = 2 * Q * (kSqr - 1) * denom;
+  a_[2] = (kSqr * Q - K + Q) * denom;
+
+  switch (filterType)
+  {
+    case FilterType :: LowPass:
+      b_[0] = kSqr * Q * denom;
+      b_[1] = 2 * b_[0];
+      b_[2] = b_[0];
+      break;
+    case FilterType :: HighPass:
+      b_[0] = Q * denom;
+      b_[1] = -2 * b_[0];
+      b_[2] = b_[0];
+      break;
+    case FilterType :: BandPass:
+      b_[0] = K * denom;
+      b_[1] = 0.0;
+      b_[2] = -b_[0];
+      break;
+    case FilterType :: BandReject:
+      b_[0] = Q * (kSqr + 1) * denom;
+      b_[1] = 2 * Q * (kSqr - 1) * denom;
+      b_[2] = b_[0];
+      break;
+    case FilterType :: AllPass:
+      b_[0] = a_[2];
+      b_[1] = a_[1];
+      b_[2] = 1;
+      break;
+    default:
+      oStream_ << "BiQuadDesign::getCoefficients: current FilterType is invalid...";
+      handleError( StkError::WARNING );
+  }
+
+}
+
 void BiQuad :: setEqualGainZeroes( void )
 {
   b_[0] = 1.0;

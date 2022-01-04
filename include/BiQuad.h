@@ -17,6 +17,12 @@ namespace stk {
 */
 /***************************************************/
 
+/*!
+    This enum allows the user to select from all of the
+    supported filter types in setFilterType.
+*/
+enum class FilterType { LowPass, HighPass, BandPass, BandReject, AllPass };
+
 class BiQuad : public Filter
 {
 public:
@@ -73,6 +79,16 @@ public:
     the sample rate.  The \e radius value should be positive.
   */
   void setNotch( StkFloat frequency, StkFloat radius );
+
+  //! Set the filter coefficients for a filter of type \e filterType with specified frequency and Q-factor.
+  /*!
+    This method determines the filter coefficients corresponding to
+    to a filter of type \e filterType with center/cutoff specified by
+    \e frequency (in Hz) and Q-factor specified by \e Q. Supported filter 
+    types are: low-pass, high-pass, band-pass, band-reject, all-pass. 
+    \e frequency and \e Q should both be positive.
+  */
+  void setFilterType( FilterType filterType, StkFloat frequency, StkFloat Q );
 
   //! Sets the filter zeroes for equal resonance gain.
   /*!
