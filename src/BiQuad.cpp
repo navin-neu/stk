@@ -93,6 +93,131 @@ void BiQuad :: setNotch( StkFloat frequency, StkFloat radius )
   b_[1] = (StkFloat) -2.0 * radius * cos( TWO_PI * (double) frequency / Stk::sampleRate() );
 }
 
+void BiQuad :: setLowPass( StkFloat frequency, StkFloat Q )
+{
+#if defined(_STK_DEBUG_)
+  if ( frequency < 0.0 ) {
+    oStream_ << "BiQuad::setLowPass: frequency argument (" << frequency << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+   if ( Q < 0.0 ) {
+    oStream_ << "BiQuad::setLowPass: Q argument (" << Q << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+#endif
+
+  StkFloat K = tan(PI * frequency / Stk::sampleRate());
+  StkFloat kSqr = K * K;
+  StkFloat denom = 1 / (kSqr * Q + K + Q);
+
+  a_[1] = 2 * Q * (kSqr - 1) * denom;
+  a_[2] = (kSqr * Q - K + Q) * denom;
+
+  b_[0] = kSqr * Q * denom;
+  b_[1] = 2 * b_[0];
+  b_[2] = b_[0];
+}
+
+void BiQuad :: setHighPass( StkFloat frequency, StkFloat Q )
+{
+#if defined(_STK_DEBUG_)
+  if ( frequency < 0.0 ) {
+    oStream_ << "BiQuad::setHighPass: frequency argument (" << frequency << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+   if ( Q < 0.0 ) {
+    oStream_ << "BiQuad::setHighPass: Q argument (" << Q << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+#endif
+
+  StkFloat K = tan(PI * frequency / Stk::sampleRate());
+  StkFloat kSqr = K * K;
+  StkFloat denom = 1 / (kSqr * Q + K + Q);
+
+  a_[1] = 2 * Q * (kSqr - 1) * denom;
+  a_[2] = (kSqr * Q - K + Q) * denom;
+
+  b_[0] = Q * denom;
+  b_[1] = -2 * b_[0];
+  b_[2] = b_[0];
+}
+
+void BiQuad :: setBandPass( StkFloat frequency, StkFloat Q )
+{
+#if defined(_STK_DEBUG_)
+  if ( frequency < 0.0 ) {
+    oStream_ << "BiQuad::setBandPass: frequency argument (" << frequency << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+   if ( Q < 0.0 ) {
+    oStream_ << "BiQuad::setBandPass: Q argument (" << Q << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+#endif
+
+  StkFloat K = tan(PI * frequency / Stk::sampleRate());
+  StkFloat kSqr = K * K;
+  StkFloat denom = 1 / (kSqr * Q + K + Q);
+
+  a_[1] = 2 * Q * (kSqr - 1) * denom;
+  a_[2] = (kSqr * Q - K + Q) * denom;
+
+  b_[0] = K * denom;
+  b_[1] = 0.0;
+  b_[2] = -b_[0];
+}
+
+void BiQuad :: setBandReject( StkFloat frequency, StkFloat Q )
+{
+#if defined(_STK_DEBUG_)
+  if ( frequency < 0.0 ) {
+    oStream_ << "BiQuad::setBandReject: frequency argument (" << frequency << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+   if ( Q < 0.0 ) {
+    oStream_ << "BiQuad::setBandReject: Q argument (" << Q << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+#endif
+
+  StkFloat K = tan(PI * frequency / Stk::sampleRate());
+  StkFloat kSqr = K * K;
+  StkFloat denom = 1 / (kSqr * Q + K + Q);
+
+  a_[1] = 2 * Q * (kSqr - 1) * denom;
+  a_[2] = (kSqr * Q - K + Q) * denom;
+
+  b_[0] = Q * (kSqr + 1) * denom;
+  b_[1] = 2 * Q * (kSqr - 1) * denom;
+  b_[2] = b_[0];
+}
+
+void BiQuad :: setAllPass( StkFloat frequency, StkFloat Q )
+{
+#if defined(_STK_DEBUG_)
+  if ( frequency < 0.0 ) {
+    oStream_ << "BiQuad::setAllPass: frequency argument (" << frequency << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+   if ( Q < 0.0 ) {
+    oStream_ << "BiQuad::setAllPass: Q argument (" << Q << ") is negative!";
+    handleError( StkError::WARNING ); return;
+  }
+#endif
+
+  StkFloat K = tan(PI * frequency / Stk::sampleRate());
+  StkFloat kSqr = K * K;
+  StkFloat denom = 1 / (kSqr * Q + K + Q);
+
+  a_[1] = 2 * Q * (kSqr - 1) * denom;
+  a_[2] = (kSqr * Q - K + Q) * denom;
+
+  b_[0] = a_[2];
+  b_[1] = a_[1];
+  b_[2] = 1;
+}
+
 void BiQuad :: setEqualGainZeroes( void )
 {
   b_[0] = 1.0;
